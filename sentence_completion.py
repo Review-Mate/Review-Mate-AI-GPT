@@ -18,6 +18,7 @@ If the context requires a negative sentence, you must complete one negative sent
 Conversely, if the context is positive, you must complete one positive sentence.
 If you can't decide whether it's positive or negative, you need to complete two sentences, one positive and one negative.
 You have to read the reviewer's review and write it by following the tone of the reviewer. 
+You have to conclude "긍정적" or "부정적" in your answer.
 
 This is some examples.
 <format>
