@@ -1,4 +1,5 @@
 import os
+import re
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -45,7 +46,7 @@ def generate_openai_response(base_message, content):
         temperature = temperature,
         max_tokens = max_tokens
     )
-    return response["choices"][0]["message"]["content"]
+    return response_postprocessing(response["choices"][0]["message"]["content"])
 
 ## response 후처리
 """
@@ -70,3 +71,8 @@ def response_postprocessing(responses):
             if len(response) == 2:
                 result_dict[response[0]] = response[1].strip()
         return result_dict
+    
+if __name__ == "main":
+    content = "조식과 석식을 호텔에서 먹었는데"
+    responses = generate_openai_response(base_message, content)
+    print(responses)
