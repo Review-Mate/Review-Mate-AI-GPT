@@ -2,8 +2,22 @@ import os
 import re
 import openai
 import json
+import boto3
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+def get_api_key():
+    lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
+    response = lambda_client.invoke(
+            FunctionName = 'arn:aws:lambda:ap-northeast-2:811439093840:function:openai_get_api_key',
+            InvocationType = 'RequestResponse'
+        )
+
+    openai_api_key = json.load(response['Payload'])['body']['api_key']
+    return openai_api_key
+
+openai.api_key = get_api_key()
+
+# 로컬에서 사용할 경우 : 로컬 환경에 key 저장해놓고 사용
+# openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 class SentenceCompletion:

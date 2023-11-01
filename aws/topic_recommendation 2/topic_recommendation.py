@@ -18,9 +18,17 @@ class TopicRecommendation:
                               "content": """A Korean traveler is writing a review written in Korean. 
                                             All you have to do is look at the reviews that have been written so far, 
                                             and recommend topics that you think would be good to come in next. 
-                                            The subject should recommend two things. 
+                                            The subject should recommend only one thing. 
                                             Since the review will be written in Korean, 
-                                            the answer should be in Korean as well."""}]
+                                            the answer should be in Korean as well.
+                                            
+                                            This is some examples.
+                                            <format>
+                                            {
+                                                "input" : "위치도 양재역과 매우 가까워서 좋았고 시설도 깔끔하고 너무 좋았습니다."
+                                                "results" : "현지 음식을 맛보거나 특별한 요리를 시도한 소감을 나누어 보세요."
+                                            }
+                                            """}]
         
         return self.model, self.temperature, self.max_tokens, self.base_message
     
