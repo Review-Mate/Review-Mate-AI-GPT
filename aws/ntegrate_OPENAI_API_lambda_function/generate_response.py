@@ -62,6 +62,56 @@ class OpenAPIGenerateResponse:
         response = self.create_openai_response(content)
         json_response = self.response_to_json(response)
         print("json_response: ", json_response)
+        # topic recommendation 인 경우
+        if json_response['sort'] == 1:
+            return json_response
+        # sentence completion 인 경우
+        elif json_response['sort'] == 2:
+            return self.sentence_completion_postprocessing(content, json_response)
+        else:
+            assert False, "sort 값이 1 또는 2가 아닙니다."
+    
+    def topic_recommendation_postprocessing(self, json_response):
+        json_response['content'] = json_response['results']
+        del json_response['results']
+        return [json_response]
+    
+    def sentence_completion_postprocessing(self, content, json_response):
+        # 마지막 문장이 '?'로 끝나는 경우, topic recommendation으로 처리
+        # 주제 추천인데 gpt가 sort값을 2로 반환하는 경우가 있음
+        if json_response['results'][0][-1] == '?':
+            json_response['sort'] = 1
+            del json_response['last sentence']
+            del json_response['polarity']
+            json_response['results'] = json_response['results'][0]
+            return self.topic_recommendation_postprocessing(json_response)
+
+        ret = []
+
+        # content에서 마지막 문장의 인덱스 찾기
+        last_sentence_start_index = content.find(json_response['last sentence'])
+        last_sentence_end_index = -1
+        json_response['idx'] = [last_sentence_start_index, last_sentence_end_index]
+
+        # POS, NEG 라벨 0, 1로 변경
+        for i in json_response['polarity']:
+            if i == 'POS':
+                json_response['polarity'][json_response['polarity'].index(i)] = 0
+            elif i == 'NEG':
+                json_response['polarity'][json_response['polarity'].index(i)] = 1
+            else:
+                assert False, "polarity 값이 POS 또는 NEG가 아닙니다."
+
+        # results가 여러 개인 경우, ret에 각각을 분할해서 저장
+        for i in range(len(json_response['results'])):
+            tmp_json = {}
+            tmp_json['sort'] = json_response['sort']
+            tmp_json['idx'] = json_response['idx']
+            tmp_json['polarity'] = json_response['polarity'][i]
+            tmp_json['content'] = json_response['results'][i]
+            ret.append(tmp_json)
+
+        return ret
 
     def create_openai_response(self, content):
         response = openai.ChatCompletion.create(
